@@ -54,7 +54,7 @@ endif
 
 WD := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
 
-CONFIG_GRAPH_LVGL_URL ?= "https://github.com/lvgl/lvgl/archive/refs/tags"
+CONFIG_GRAPH_LVGL_URL ?= https://github.com/lvgl/lvgl/archive/refs/tags
 
 LVGL_PATCHS ?= $(sort $(wildcard 000*.patch))
 
@@ -69,7 +69,12 @@ LVGL_UNPACKDIR =  $(WD)/$(LVGL_UNPACKNAME)
 
 $(LVGL_TARBALL):
 	$(ECHO_BEGIN)"Downloading: $(LVGL_TARBALL)"
-	$(Q) $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL)
+	$(Q) if [ ! -f "$(NXTMPDIR)/$(LVGL_TARBALL)" ]; then \
+		$(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL); \
+		mv $(WD)/$(LVGL_TARBALL) $(NXTMPDIR); \
+	 fi
+	$(Q) cp -f $(NXTMPDIR)/$(LVGL_TARBALL) $(WD)/$(LVGL_TARBALL)
+# $(Q) $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL)
 	$(ECHO_END)
 
 $(LVGL_UNPACKNAME): $(LVGL_TARBALL)
