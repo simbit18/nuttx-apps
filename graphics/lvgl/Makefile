@@ -25,6 +25,8 @@ include $(APPDIR)/Make.defs
 LVGL_DIR = .
 LVGL_DIR_NAME = lvgl
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 -include ./lvgl/lvgl.mk
 
 ifneq ($(CONFIG_LV_ASSERT_HANDLER_INCLUDE), "")
@@ -69,12 +71,16 @@ LVGL_UNPACKDIR =  $(WD)/$(LVGL_UNPACKNAME)
 
 $(LVGL_TARBALL):
 	$(ECHO_BEGIN)"Downloading: $(LVGL_TARBALL)"
+ifeq ($(STORAGETMP),y)
 	$(Q) if [ ! -f "$(NXTMPDIR)/$(LVGL_TARBALL)" ]; then \
 		$(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL); \
 		mv $(WD)/$(LVGL_TARBALL) $(NXTMPDIR); \
 	 fi
 	$(Q) cp -f $(NXTMPDIR)/$(LVGL_TARBALL) $(WD)/$(LVGL_TARBALL)
-# $(Q) $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL)
+else
+	$(Q) $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL)
+endif
+
 	$(ECHO_END)
 
 $(LVGL_UNPACKNAME): $(LVGL_TARBALL)
