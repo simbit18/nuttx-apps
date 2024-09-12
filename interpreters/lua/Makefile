@@ -69,7 +69,16 @@ endif
 
 $(LUA_TARBALL):
 	$(Q) echo "Downloading $(LUA_TARBALL)"
+ifeq ($(STORAGETMP),y)
+	$(Q) if [ ! -f "$(NXTMPDIR)/$(LUA_TARBALL)" ]; then \
+		$(Q) curl -O -L $(LUA_URL); \
+		mv $(LUA_TARBALL) $(NXTMPDIR); \
+	 fi
+	$(Q) cp -f $(NXTMPDIR)/$(LUA_TARBALL) $(LUA_TARBALL)
+else
 	$(Q) curl -O -L $(LUA_URL)
+endif
+# $(Q) curl -O -L $(LUA_URL)
 	$(Q) echo "Unpacking $(LUA_TARBALL) to $(LUA_UNPACK)"
 	$(Q) tar -xvzf $(LUA_TARBALL)
 	$(Q) mv lua-$(LUA_VERSION) $(LUA_UNPACK)
