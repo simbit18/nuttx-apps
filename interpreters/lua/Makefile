@@ -67,9 +67,22 @@ endif
 
 # Lua download and unpack
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
+ifeq ($(STORAGETMP),y)
+define CURL_LUA
+	$(call CURLSTORE,$(LUA_URL),$(LUA_TARBALL),$(NXTMPDIR)/$(LUA_TARBALL))
+endef
+else
+define CURL_LUA
+	$(call CURLSTORE,$(LUA_URL),$(LUA_TARBALL))
+endef
+endif
+
 $(LUA_TARBALL):
 	$(Q) echo "Downloading $(LUA_TARBALL)"
-	$(Q) curl -O -L $(LUA_URL)
+	$(Q) $(call CURL_LUA)
+# $(Q) curl -O -L $(LUA_URL)
 	$(Q) echo "Unpacking $(LUA_TARBALL) to $(LUA_UNPACK)"
 	$(Q) tar -xvzf $(LUA_TARBALL)
 	$(Q) mv lua-$(LUA_VERSION) $(LUA_UNPACK)
