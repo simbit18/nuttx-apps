@@ -63,17 +63,31 @@ LVGL_TARBALL = v$(LVGL_VERSION).zip
 
 LVGL_UNPACKNAME = lvgl
 UNPACK ?= unzip -o $(if $(V),,-q)
-CURL ?= curl -L -O $(if $(V),,-Ss)
+# CURL ?= curl -L -O $(if $(V),,-Ss)
 
 LVGL_UNPACKDIR =  $(WD)/$(LVGL_UNPACKNAME)
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
+ifeq ($(STORAGETMP),y)
+define CURL_LVGL
+	$(call CURLSTORE,$(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL),$(LVGL_TARBALL),$(NXTMPDIR)/$(LVGL_TARBALL))
+endef
+else
+define CURL_LVGL
+	$(call CURLSTORE,$(CONFIG_GRAPH_LVGL_URL),$(LVGL_TARBALL))
+endef
+endif
+
+
 $(LVGL_TARBALL):
 	$(ECHO_BEGIN)"Downloading: $(LVGL_TARBALL)"
-	$(Q) if [ ! -f "$(NXTMPDIR)/$(LVGL_TARBALL)" ]; then \
-		$(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL); \
-		mv $(WD)/$(LVGL_TARBALL) $(NXTMPDIR); \
-	 fi
-	$(Q) cp -f $(NXTMPDIR)/$(LVGL_TARBALL) $(WD)/$(LVGL_TARBALL)
+	$(call CURL_LVGL)
+	# $(Q) if [ ! -f "$(NXTMPDIR)/$(LVGL_TARBALL)" ]; then \
+		# $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL); \
+		# mv $(WD)/$(LVGL_TARBALL) $(NXTMPDIR); \
+	 # fi
+	# $(Q) cp -f $(NXTMPDIR)/$(LVGL_TARBALL) $(WD)/$(LVGL_TARBALL)
 # $(Q) $(CURL) $(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL)
 	$(ECHO_END)
 
