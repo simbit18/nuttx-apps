@@ -75,7 +75,7 @@ define CURL_LVGL
 endef
 else
 define CURL_LVGL
-	$(call CURLSTORE,$(CONFIG_GRAPH_LVGL_URL),$(LVGL_TARBALL))
+	$(call CURLSTORE,$(CONFIG_GRAPH_LVGL_URL)/$(LVGL_TARBALL),$(LVGL_TARBALL))
 endef
 endif
 
