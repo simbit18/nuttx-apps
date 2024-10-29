@@ -16,8 +16,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-set -e
-set -o xtrace
+
 # Get the input parameter list
 
 USAGE="USAGE: mkkconfig.sh [-d] [-h] [-m <menu>] [-o <kconfig-file>]"
