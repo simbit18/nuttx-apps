@@ -22,15 +22,18 @@
 
 include $(APPDIR)/Make.defs
 
-QUICKJS_VERSION  = 2020-11-08
+QUICKJS_VERSION  = master
 QUICKJS_UNPACK   = quickjs
-QUICKJS_TARBALL  = quickjs-$(QUICKJS_VERSION).tar.xz
-QUICKJS_URL_BASE = https://bellard.org/quickjs/
-QUICKJS_URL      = $(QUICKJS_URL_BASE)/$(QUICKJS_TARBALL)
+#QUICKJS_TARBALL  = quickjs-$(QUICKJS_VERSION).tar.xz
+#QUICKJS_URL_BASE = https://bellard.org/quickjs/
+QUICKJS_ZIP      = quickjs-$(QUICKJS_VERSION).zip
+QUICKJS_URL_BASE = https://github.com/bellard/quickjs/archive/refs/heads
+QUICKJS_URL      = $(QUICKJS_URL_BASE)/$(QUICKJS_ZIP)
 
 CSRCS = quickjs.c libregexp.c libbf.c libunicode.c cutils.c
 
-VERSION=\"$(QUICKJS_VERSION)\"
+# VERSION=\"$(QUICKJS_VERSION)\"
+VERSION=\"2020-11-08\"
 
 CFLAGS += -Dmp_add=qjs_mp_add -Dmp_sub=qjs_mp_sub -Dmp_mul=qjs_mp_mul
 CFLAGS += -DCONFIG_VERSION=$(VERSION) -Wno-shadow
@@ -63,13 +66,14 @@ STACKSIZE = $(CONFIG_INTERPRETERS_QUICKJS_STACKSIZE)
 MODULE    = $(CONFIG_INTERPRETERS_QUICKJS)
 endif
 
-$(QUICKJS_TARBALL):
-	$(Q) echo "Downloading $(QUICKJS_TARBALL)"
+$(QUICKJS_ZIP):
+	$(Q) echo "Downloading $(QUICKJS_ZIP)"
 	$(Q) curl -O -L $(QUICKJS_URL)
 
-$(QUICKJS_UNPACK): $(QUICKJS_TARBALL)
-	$(Q) echo "Unpacking $(QUICKJS_TARBALL) to $(QUICKJS_UNPACK)"
-	$(Q) tar -Jxf $(QUICKJS_TARBALL)
+$(QUICKJS_UNPACK): $(QUICKJS_ZIP)
+	$(Q) echo "Unpacking $(QUICKJS_ZIP) to $(QUICKJS_UNPACK)"
+# $(Q) tar -Jxf $(QUICKJS_TARBALL)
+	$(Q) unzip -q -o $(QUICKJS_ZIP)
 	$(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
 	$(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
 
@@ -81,7 +85,7 @@ ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
 QUICKJS_DOWNLOAD=$(QUICKJS_UNPACK)/.patch
 distclean::
 	$(call DELDIR, $(QUICKJS_UNPACK))
-	$(call DELFILE, $(QUICKJS_TARBALL))
+	$(call DELFILE, $(QUICKJS_ZIP))
 endif
 
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_MINI),y)
