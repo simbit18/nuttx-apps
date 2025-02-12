@@ -28,7 +28,8 @@ QUICKJS_UNPACK   = quickjs
 #QUICKJS_URL_BASE = https://bellard.org/quickjs/
 QUICKJS_ZIP      = quickjs-$(QUICKJS_VERSION).zip
 QUICKJS_URL_BASE = https://github.com/bellard/quickjs/archive/refs/heads
-QUICKJS_URL      = $(QUICKJS_URL_BASE)/$(QUICKJS_ZIP)
+QUICKJS_URL      = $(QUICKJS_URL_BASE)/$(QUICKJS_VERSION).zip
+UNPACK ?= unzip -q -o
 
 CSRCS = quickjs.c libregexp.c libbf.c libunicode.c cutils.c
 
@@ -70,10 +71,10 @@ $(QUICKJS_ZIP):
 	$(Q) echo "Downloading $(QUICKJS_ZIP)"
 	$(Q) curl -O -L $(QUICKJS_URL)
 
+# $(Q) tar -Jxf $(QUICKJS_TARBALL)
 $(QUICKJS_UNPACK): $(QUICKJS_ZIP)
 	$(Q) echo "Unpacking $(QUICKJS_ZIP) to $(QUICKJS_UNPACK)"
-# $(Q) tar -Jxf $(QUICKJS_TARBALL)
-	$(Q) unzip -q -o $(QUICKJS_ZIP)
+	$(Q) $(UNPACK) $(QUICKJS_ZIP)
 	$(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
 	$(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
 
