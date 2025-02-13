@@ -24,17 +24,29 @@ if(CONFIG_INTERPRETERS_QUICKJS)
   set(QUICKJS_DIR ${CMAKE_CURRENT_LIST_DIR}/quickjs)
 
   if(NOT EXISTS ${QUICKJS_DIR})
-    set(QUICKJS_URL_BASE https://github.com/bellard/quickjs/archive/)
+    # set(QUICKJS_URL_BASE https://github.com/bellard/quickjs/archive/)
+    set(QUICKJS_URL_BASE https://github.com/bellard/quickjs.git)
 
+    # FetchContent_Declare(
+      # quickjs_fetch
+      # URL ${QUICKJS_URL_BASE}/refs/heads/master.zip SOURCE_DIR
+          # ${CMAKE_CURRENT_LIST_DIR}/quickjs BINARY_DIR
+          # ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs 
+      # PATCH_COMMAND
+        # patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/quickjs <
+        # ${CMAKE_CURRENT_LIST_DIR}/0001-Disabled-unsupported-feature-on-NuttX.patch
+      # DOWNLOAD_NO_PROGRESS true
+      # TIMEOUT 30)
     FetchContent_Declare(
       quickjs_fetch
-      URL ${QUICKJS_URL_BASE}/refs/heads/master.zip SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/quickjs BINARY_DIR
-          ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs
+      GIT_REPOSITORY ${QUICKJS_URL_BASE}
+      GIT_TAG        6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
+      SOURCE_DIR     ${CMAKE_CURRENT_LIST_DIR}/quickjs
+      BINARY_DIR     ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs 
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/quickjs <
         ${CMAKE_CURRENT_LIST_DIR}/0001-Disabled-unsupported-feature-on-NuttX.patch
-      DOWNLOAD_NO_PROGRESS true
+      GIT_PROGRESS false
       TIMEOUT 30)
 
     FetchContent_GetProperties(quickjs)
