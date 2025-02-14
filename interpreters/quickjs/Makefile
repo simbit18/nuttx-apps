@@ -22,11 +22,14 @@
 
 include $(APPDIR)/Make.defs
 
-QUICKJS_VERSION  = 2020-11-08
-QUICKJS_UNPACK   = quickjs
-QUICKJS_TARBALL  = quickjs-$(QUICKJS_VERSION).tar.xz
-QUICKJS_URL_BASE = https://bellard.org/quickjs/
-QUICKJS_URL      = $(QUICKJS_URL_BASE)/$(QUICKJS_TARBALL)
+# QUICKJS_VERSION  = 2020-11-08
+QUICKJS_VERSION  = 2024-02-14
+QUICKJS_TAG      = 6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
+# QUICKJS_UNPACK   = quickjs
+QUICKJS_REPO     = quickjs
+# QUICKJS_TARBALL  = quickjs-$(QUICKJS_VERSION).tar.xz
+# QUICKJS_URL_BASE = https://bellard.org/quickjs/
+QUICKJS_URL      = https://github.com/bellard/quickjs.git
 
 CSRCS = quickjs.c libregexp.c libbf.c libunicode.c cutils.c
 
@@ -34,7 +37,8 @@ VERSION=\"$(QUICKJS_VERSION)\"
 
 CFLAGS += -Dmp_add=qjs_mp_add -Dmp_sub=qjs_mp_sub -Dmp_mul=qjs_mp_mul
 CFLAGS += -DCONFIG_VERSION=$(VERSION) -Wno-shadow
-CFLAGS += -Wno-array-bounds -I$(QUICKJS_UNPACK)
+# CFLAGS += -Wno-array-bounds -I$(QUICKJS_UNPACK)
+CFLAGS += -Wno-array-bounds -I$(QUICKJS_REPO)
 CFLAGS += -D__linux__ -include alloca.h
 CFLAGS += -Wno-incompatible-pointer-types
 CFLAGS += -Wno-implicit-function-declaration
@@ -53,8 +57,11 @@ CFLAGS += -DCONFIG_BIGNUM
 CSRCS  += qjscalc.c
 endif
 
-VPATH += $(QUICKJS_UNPACK)
-DEPPATH += --dep-path $(QUICKJS_UNPACK)
+# VPATH += $(QUICKJS_UNPACK)
+# DEPPATH += --dep-path $(QUICKJS_UNPACK)
+
+VPATH += $(QUICKJS_REPO)
+DEPPATH += --dep-path $(QUICKJS_REPO)
 
 ifneq ($(CONFIG_INTERPRETERS_QUICKJS_NONE),y)
 PROGNAME  = qjs
@@ -63,42 +70,78 @@ STACKSIZE = $(CONFIG_INTERPRETERS_QUICKJS_STACKSIZE)
 MODULE    = $(CONFIG_INTERPRETERS_QUICKJS)
 endif
 
-$(QUICKJS_TARBALL):
-	$(Q) echo "Downloading $(QUICKJS_TARBALL)"
-	$(Q) curl -O -L $(QUICKJS_URL)
+# $(QUICKJS_TARBALL):
+	# $(Q) echo "Downloading $(QUICKJS_TARBALL)"
+	# $(Q) curl -O -L $(QUICKJS_URL)
 
-$(QUICKJS_UNPACK): $(QUICKJS_TARBALL)
-	$(Q) echo "Unpacking $(QUICKJS_TARBALL) to $(QUICKJS_UNPACK)"
-	$(Q) tar -Jxf $(QUICKJS_TARBALL)
-	$(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
-	$(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
+# $(QUICKJS_UNPACK): $(QUICKJS_TARBALL)
+	# $(Q) echo "Unpacking $(QUICKJS_TARBALL) to $(QUICKJS_UNPACK)"
+	# $(Q) tar -Jxf $(QUICKJS_TARBALL)
+	# $(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
+	# $(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
 
-$(QUICKJS_UNPACK)/.patch: $(QUICKJS_UNPACK)
-	$(Q) touch $(QUICKJS_UNPACK)/.patch
+$(QUICKJS_REPO):
+	$(Q) echo "Cloning $(QUICKJS_REPO)"
+	$(Q) git clone --quiet $(QUICKJS_URL) $(QUICKJS_REPO)
+	$(Q) git -C $(QUICKJS_REPO) checkout --quiet $(QUICKJS_TAG)
+# $(Q) tar -Jxf $(QUICKJS_TARBALL)
+# $(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
+	$(Q) patch -d $(QUICKJS_REPO) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
+
+# $(QUICKJS_UNPACK)/.patch: $(QUICKJS_UNPACK)
+	# $(Q) touch $(QUICKJS_UNPACK)/.patch
+
+# $(QUICKJS_REPO)/.patch: $(QUICKJS_REPO)
+	# $(Q) touch $(QUICKJS_REPO)/.patch
 
 # Download and unpack tarball if no git repo found
-ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
-QUICKJS_DOWNLOAD=$(QUICKJS_UNPACK)/.patch
-distclean::
-	$(call DELDIR, $(QUICKJS_UNPACK))
-	$(call DELFILE, $(QUICKJS_TARBALL))
-endif
+# ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
+# QUICKJS_DOWNLOAD=$(QUICKJS_UNPACK)/.patch
+# distclean::
+	# $(call DELDIR, $(QUICKJS_UNPACK))
+	# $(call DELFILE, $(QUICKJS_TARBALL))
+# endif
+
+ifeq ($(wildcard $(QUICKJS_REPO)/.git),)
+# QUICKJS_DOWNLOAD=$(QUICKJS_REPO)/.patch
+# distclean::
+	# $(call DELDIR, $(QUICKJS_REPO))
+# $(call DELFILE, $(QUICKJS_TARBALL))
+# endif
 
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_MINI),y)
 MAINSRC = qjsmini.c
 endif
 
+# ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
+# CSRCS += quickjs-libc.c repl.c
+# MAINSRC = qjs.c
+# context:: $(QUICKJS_DOWNLOAD)
+	# $(MAKE) -C $(QUICKJS_UNPACK) \
+		# CONFIG_BIGNUM=$(CONFIG_INTERPRETERS_QUICKJS_BIGNUM)
+# else
+# context:: $(QUICKJS_DOWNLOAD)
+# endif
+
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
 CSRCS += quickjs-libc.c repl.c
 MAINSRC = qjs.c
-context:: $(QUICKJS_DOWNLOAD)
-	$(MAKE) -C $(QUICKJS_UNPACK) \
+context:: $(QUICKJS_REPO)
+	$(MAKE) -C $(QUICKJS_REPO) \
 		CONFIG_BIGNUM=$(CONFIG_INTERPRETERS_QUICKJS_BIGNUM)
 else
-context:: $(QUICKJS_DOWNLOAD)
+context:: $(QUICKJS_REPO)
 endif
 
+# clean::
+	# $(Q) test ! -d $(QUICKJS_UNPACK) || $(MAKE) -C $(QUICKJS_UNPACK) clean
+
 clean::
-	$(Q) test ! -d $(QUICKJS_UNPACK) || $(MAKE) -C $(QUICKJS_UNPACK) clean
+	$(Q) $(MAKE) -C $(QUICKJS_REPO) clean
+
+distclean::
+	$(call DELDIR, $(QUICKJS_REPO))
+
+endif
 
 include $(APPDIR)/Application.mk
