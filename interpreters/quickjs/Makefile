@@ -102,7 +102,7 @@ $(QUICKJS_REPO):
 	# $(call DELFILE, $(QUICKJS_TARBALL))
 # endif
 
-ifeq ($(wildcard $(QUICKJS_REPO)/.git),)
+
 # QUICKJS_DOWNLOAD=$(QUICKJS_REPO)/.patch
 # distclean::
 	# $(call DELDIR, $(QUICKJS_REPO))
@@ -133,6 +133,7 @@ else
 context:: $(QUICKJS_REPO)
 endif
 
+ifeq ($(wildcard $(QUICKJS_REPO)/.git),)
 # clean::
 	# $(Q) test ! -d $(QUICKJS_UNPACK) || $(MAKE) -C $(QUICKJS_UNPACK) clean
 
