@@ -68,7 +68,7 @@ $(QUICKJS_ARCHIVE):
 	$(Q) curl -L $(QUICKJS_URL) -o quickjs-$(QUICKJS_ARCHIVE)
 
 $(QUICKJS_UNPACK): $(QUICKJS_ARCHIVE)
-	$(Q) echo "Unpacking $(QUICKJS_ARCHIVE) to $(QUICKJS_UNPACK)"
+	$(Q) echo "Unpacking quickjs-$(QUICKJS_ARCHIVE) to $(QUICKJS_UNPACK)"
 	$(Q) unzip -q -o quickjs-$(QUICKJS_ARCHIVE)
 	$(Q) mv quickjs-$(QUICKJS_COMMIT_ID) $(QUICKJS_UNPACK)
 	$(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
@@ -92,11 +92,6 @@ else
 context:: $(QUICKJS_UNPACK)
 endif
 endif
-
-# clean::
-# ifneq ($(wildcard $(QUICKJS_UNPACK)/.*),)
-	# $(Q) $(MAKE) -C $(QUICKJS_UNPACK) clean
-# endif
 
 distclean::
 	$(call DELDIR, $(QUICKJS_UNPACK))
