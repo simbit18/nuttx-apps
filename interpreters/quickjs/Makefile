@@ -85,7 +85,7 @@ endif
 
 $(QUICKJS_DOWNLOAD):
 	$(Q) echo "Downloading $(QUICKJS_ARCHIVE)"
-	$(Q) curl -O -L $(QUICKJS_URL)
+	$(Q) curl -L $(QUICKJS_URL) -o quickjs-$(QUICKJS_ARCHIVE)
 
 
 $(QUICKJS_UNPACK): $(QUICKJS_DOWNLOAD)
