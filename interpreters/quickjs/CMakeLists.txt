@@ -25,7 +25,9 @@ if(CONFIG_INTERPRETERS_QUICKJS)
 
   if(NOT EXISTS ${QUICKJS_DIR})
     # set(QUICKJS_URL_BASE https://github.com/bellard/quickjs/archive/)
-    set(QUICKJS_URL_BASE https://github.com/bellard/quickjs.git)
+    # git
+    # set(QUICKJS_URL_BASE https://github.com/bellard/quickjs.git)
+    set(QUICKJS_URL_BASE https://github.com/bellard/quickjs/archive/)
 
     # FetchContent_Declare(
       # quickjs_fetch
@@ -37,16 +39,29 @@ if(CONFIG_INTERPRETERS_QUICKJS)
         # ${CMAKE_CURRENT_LIST_DIR}/0001-Disabled-unsupported-feature-on-NuttX.patch
       # DOWNLOAD_NO_PROGRESS true
       # TIMEOUT 30)
+    
+    # git
+    # FetchContent_Declare(
+      # quickjs_fetch
+      # GIT_REPOSITORY ${QUICKJS_URL_BASE}
+      # GIT_TAG        6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
+      # SOURCE_DIR     ${CMAKE_CURRENT_LIST_DIR}/quickjs
+      # BINARY_DIR     ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs 
+      # PATCH_COMMAND
+        # patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/quickjs <
+        # ${CMAKE_CURRENT_LIST_DIR}/0001-Disabled-unsupported-feature-on-NuttX.patch
+      # GIT_PROGRESS false
+      # TIMEOUT 30)
+
     FetchContent_Declare(
       quickjs_fetch
-      GIT_REPOSITORY ${QUICKJS_URL_BASE}
-      GIT_TAG        6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
-      SOURCE_DIR     ${CMAKE_CURRENT_LIST_DIR}/quickjs
-      BINARY_DIR     ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs 
+      URL ${QUICKJS_URL_BASE}/refs/heads/6e2e68fd0896957f92eb6c242a2e048c1ef3cae0.zip SOURCE_DIR
+          ${CMAKE_CURRENT_LIST_DIR}/quickjs BINARY_DIR
+          ${CMAKE_BINARY_DIR}/apps/interpreters/quickjs/quickjs 
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/quickjs <
         ${CMAKE_CURRENT_LIST_DIR}/0001-Disabled-unsupported-feature-on-NuttX.patch
-      GIT_PROGRESS false
+      DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
     FetchContent_GetProperties(quickjs)
