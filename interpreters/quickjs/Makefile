@@ -83,15 +83,13 @@ endif
 	# $(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
 	# $(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
 
-$(QUICKJS_DOWNLOAD):
+$(QUICKJS_ARCHIVE):
 	$(Q) echo "Downloading $(QUICKJS_ARCHIVE)"
 	$(Q) curl -L $(QUICKJS_URL) -o quickjs-$(QUICKJS_ARCHIVE)
 
 
-$(QUICKJS_UNPACK): $(QUICKJS_DOWNLOAD)
+$(QUICKJS_UNPACK): $(QUICKJS_ARCHIVE)
 	$(Q) echo "Unpacking $(QUICKJS_ARCHIVE) to $(QUICKJS_UNPACK)"
-# $(Q) tar -Jxf $(QUICKJS_TARBALL)
-# $(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
 	$(Q) unzip -q -o quickjs-$(QUICKJS_ARCHIVE)
 	$(Q) mv quickjs-$(QUICKJS_COMMIT_ID) $(QUICKJS_UNPACK)
 	$(Q) touch $(QUICKJS_UNPACK)
