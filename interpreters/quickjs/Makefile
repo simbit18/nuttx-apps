@@ -22,17 +22,11 @@
 
 include $(APPDIR)/Make.defs
 
-# QUICKJS_VERSION  = 2020-11-08
-QUICKJS_VERSION  = 2024-02-14
-# QUICKJS_TAG      = 6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
+QUICKJS_VERSION     = 2024-02-14
 QUICKJS_COMMIT_ID   = 6e2e68fd0896957f92eb6c242a2e048c1ef3cae0
-QUICKJS_UNPACK   = quickjs
-QUICKJS_ARCHIVE  = $(QUICKJS_COMMIT_ID).zip
-# QUICKJS_UNPACK     = quickjs
-# QUICKJS_TARBALL  = quickjs-$(QUICKJS_VERSION).tar.xz
-# QUICKJS_URL_BASE = https://bellard.org/quickjs/
-# QUICKJS_URL      = https://github.com/bellard/quickjs.git
-QUICKJS_URL      = https://github.com/bellard/quickjs/archive/$(QUICKJS_ARCHIVE)
+QUICKJS_UNPACK      = quickjs
+QUICKJS_ARCHIVE     = $(QUICKJS_COMMIT_ID).zip
+QUICKJS_URL         = https://github.com/bellard/quickjs/archive/$(QUICKJS_ARCHIVE)
 
 CSRCS = quickjs.c libregexp.c libbf.c libunicode.c cutils.c
 
@@ -40,7 +34,6 @@ VERSION=\"$(QUICKJS_VERSION)\"
 
 CFLAGS += -Dmp_add=qjs_mp_add -Dmp_sub=qjs_mp_sub -Dmp_mul=qjs_mp_mul
 CFLAGS += -DCONFIG_VERSION=$(VERSION) -Wno-shadow
-# CFLAGS += -Wno-array-bounds -I$(QUICKJS_UNPACK)
 CFLAGS += -Wno-array-bounds -I$(QUICKJS_UNPACK)
 CFLAGS += -D__linux__ -include alloca.h
 CFLAGS += -Wno-incompatible-pointer-types
@@ -60,9 +53,6 @@ CFLAGS += -DCONFIG_BIGNUM
 CSRCS  += qjscalc.c
 endif
 
-# VPATH += $(QUICKJS_UNPACK)
-# DEPPATH += --dep-path $(QUICKJS_UNPACK)
-
 VPATH += $(QUICKJS_UNPACK)
 DEPPATH += --dep-path $(QUICKJS_UNPACK)
 
@@ -73,70 +63,27 @@ STACKSIZE = $(CONFIG_INTERPRETERS_QUICKJS_STACKSIZE)
 MODULE    = $(CONFIG_INTERPRETERS_QUICKJS)
 endif
 
-# $(QUICKJS_TARBALL):
-	# $(Q) echo "Downloading $(QUICKJS_TARBALL)"
-	# $(Q) curl -O -L $(QUICKJS_URL)
-
-# $(QUICKJS_UNPACK): $(QUICKJS_TARBALL)
-	# $(Q) echo "Unpacking $(QUICKJS_TARBALL) to $(QUICKJS_UNPACK)"
-	# $(Q) tar -Jxf $(QUICKJS_TARBALL)
-	# $(Q) mv quickjs-$(QUICKJS_VERSION) $(QUICKJS_UNPACK)
-	# $(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
-
 $(QUICKJS_ARCHIVE):
 	$(Q) echo "Downloading $(QUICKJS_ARCHIVE)"
 	$(Q) curl -L $(QUICKJS_URL) -o quickjs-$(QUICKJS_ARCHIVE)
-
 
 $(QUICKJS_UNPACK): $(QUICKJS_ARCHIVE)
 	$(Q) echo "Unpacking $(QUICKJS_ARCHIVE) to $(QUICKJS_UNPACK)"
 	$(Q) unzip -q -o quickjs-$(QUICKJS_ARCHIVE)
 	$(Q) mv quickjs-$(QUICKJS_COMMIT_ID) $(QUICKJS_UNPACK)
-	$(Q) touch $(QUICKJS_UNPACK)
 	$(Q) patch -d $(QUICKJS_UNPACK) -p1 < 0001-Disabled-unsupported-feature-on-NuttX.patch
-
-# $(QUICKJS_UNPACK)/.patch: $(QUICKJS_UNPACK)
-	# $(Q) touch $(QUICKJS_UNPACK)/.patch
-
-# $(QUICKJS_UNPACK)/.patch: $(QUICKJS_UNPACK)
-	# $(Q) touch $(QUICKJS_UNPACK)/.patch
-
-# Download and unpack tarball if no git repo found
-# ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
-# QUICKJS_DOWNLOAD=$(QUICKJS_UNPACK)/.patch
-# distclean::
-	# $(call DELDIR, $(QUICKJS_UNPACK))
-	# $(call DELFILE, $(QUICKJS_TARBALL))
-# endif
-
-
-# QUICKJS_DOWNLOAD=$(QUICKJS_UNPACK)/.patch
-# distclean::
-	# $(call DELDIR, $(QUICKJS_UNPACK))
-# $(call DELFILE, $(QUICKJS_TARBALL))
-# endif
 
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_MINI),y)
 MAINSRC = qjsmini.c
 endif
 
-
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
 CSRCS += quickjs-libc.c repl.c
 MAINSRC = qjs.c
 endif
-# ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
-# CSRCS += quickjs-libc.c repl.c
-# MAINSRC = qjs.c
-# context:: $(QUICKJS_DOWNLOAD)
-	# $(MAKE) -C $(QUICKJS_UNPACK) \
-		# CONFIG_BIGNUM=$(CONFIG_INTERPRETERS_QUICKJS_BIGNUM)
-# else
-# context:: $(QUICKJS_DOWNLOAD)
-# endif
 
-
-
+# Download and unpack zipball if no archive found
+ifeq ($(wildcard $(QUICKJS_UNPACK)/.*),)
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
 context:: $(QUICKJS_UNPACK)
 	$(MAKE) -C $(QUICKJS_UNPACK) \
@@ -144,16 +91,15 @@ context:: $(QUICKJS_UNPACK)
 else
 context:: $(QUICKJS_UNPACK)
 endif
-# clean::
-	# $(Q) test ! -d $(QUICKJS_UNPACK) || $(MAKE) -C $(QUICKJS_UNPACK) clean
+endif
 
-ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
 clean::
+ifneq ($(wildcard $(QUICKJS_UNPACK)/.*),)
 	$(Q) $(MAKE) -C $(QUICKJS_UNPACK) clean
+endif
 
 distclean::
 	$(call DELDIR, $(QUICKJS_UNPACK))
 	$(call DELFILE, $(QUICKJS_ARCHIVE))
-endif
 
 include $(APPDIR)/Application.mk
