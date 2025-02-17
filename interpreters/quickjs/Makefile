@@ -93,10 +93,10 @@ context:: $(QUICKJS_UNPACK)
 endif
 endif
 
-clean::
-ifneq ($(wildcard $(QUICKJS_UNPACK)/.*),)
-	$(Q) $(MAKE) -C $(QUICKJS_UNPACK) clean
-endif
+# clean::
+# ifneq ($(wildcard $(QUICKJS_UNPACK)/.*),)
+	# $(Q) $(MAKE) -C $(QUICKJS_UNPACK) clean
+# endif
 
 distclean::
 	$(call DELDIR, $(QUICKJS_UNPACK))
