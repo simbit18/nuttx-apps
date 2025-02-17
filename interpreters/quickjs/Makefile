@@ -138,7 +138,6 @@ endif
 # endif
 
 
-ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
 
 ifeq ($(CONFIG_INTERPRETERS_QUICKJS_FULL),y)
 context:: $(QUICKJS_UNPACK)
@@ -150,13 +149,13 @@ endif
 # clean::
 	# $(Q) test ! -d $(QUICKJS_UNPACK) || $(MAKE) -C $(QUICKJS_UNPACK) clean
 
+ifeq ($(wildcard $(QUICKJS_UNPACK)/.git),)
 clean::
 	$(Q) $(MAKE) -C $(QUICKJS_UNPACK) clean
 
 distclean::
 	$(call DELDIR, $(QUICKJS_UNPACK))
 	$(call DELFILE, $(QUICKJS_ARCHIVE))
-
 endif
 
 include $(APPDIR)/Application.mk
