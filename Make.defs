@@ -147,6 +147,21 @@ NUTTXLIB ?= $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
 #			$(VAR_2) = x y z
 #			$(VAR_3) = foo bar
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define SPLITVARIABLE
+	$(eval SPLITVARIABLE_PREFIX = $(1))
+	$(eval BATCH_SIZE = $(3))
+	$(eval TOTAL_BATCH = $(shell expr $(words $(2)) / $(BATCH_SIZE) + 1))
+	$(eval $(SPLITVARIABLE_PREFIX)_TOTAL = $(shell seq 1 $(TOTAL_BATCH)))
+	$(foreach idx, $($(SPLITVARIABLE_PREFIX)_TOTAL), \
+		$(eval FROMINDEX=$(shell expr 1 + $(idx) * $(BATCH_SIZE) - $(BATCH_SIZE))) \
+		$(eval $(SPLITVARIABLE_PREFIX)_$(idx)=$(wordlist $(FROMINDEX), $(shell expr $(FROMINDEX) + $(BATCH_SIZE) - 1), $(2))) \
+	)
+$(info $$SPLITVARIABLE_PREFIX = $(SPLITVARIABLE_PREFIX))
+$(info $$BATCH_SIZE = $(BATCH_SIZE))
+$(info $$TOTAL_BATCH = $(TOTAL_BATCH))
+endef
+else
 define SPLITVARIABLE
 	$(eval SPLITVARIABLE_PREFIX = $(1))
 	$(eval BATCH_SIZE = $(3))
@@ -157,6 +172,7 @@ define SPLITVARIABLE
 		$(eval $(SPLITVARIABLE_PREFIX)_$(idx)=$(wordlist $(FROMINDEX), $(shell expr $(FROMINDEX) + $(BATCH_SIZE) - 1), $(2))) \
 	)
 endef
+endif
 
 define ARLOCK
 	flock $1.lock $(call ARCHIVE, $1, $(2))
