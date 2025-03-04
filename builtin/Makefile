@@ -40,9 +40,16 @@ builtin_list.c: builtin_list.h builtin_proto.h
 registry$(DELIM).updated:
 	$(Q) touch registry$(DELIM).updated
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define CONFILE
+    $(info $$(2) = $(2))
+    $(foreach FILE, $(strip $(2)), $(NEWLINE) type $(FILE) >> $1)
+endef
+else
 define CONFILE
     if [ -n "$(strip $(2))" ]; then cat $(2) >> $1; fi
 endef
+endif
 
 builtin_list.h: registry$(DELIM).updated
 ifeq ($(BDATLIST),)
@@ -52,7 +59,7 @@ else
 	$(shell echo '' > builtin_list.h)
 	$(call SPLITVARIABLE,BDA,$(BDATLIST),50) \
 	$(foreach BATCH, $(BDA_TOTAL), \
-	  	$(shell $(call CONFILE, builtin_list.h, $(BDA_$(BATCH)))) \
+		$(shell $(call CONFILE, builtin_list.h, $(BDA_$(BATCH)))) \
 	)
 endif
 
