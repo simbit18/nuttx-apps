@@ -60,10 +60,10 @@ $(foreach SDIR, $(CONFIGURED_APPS), $(eval $(call SDIR_template,$(SDIR),depend))
 $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
 $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
 
-$(MKDEP): $(TOPDIR)/tools/mkdeps.c
+$(MKDEP): $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps.c
 	$(HOSTCC) $(HOSTINCLUDES) $(HOSTCFLAGS) $< -o $@
 
-$(INCDIR): $(TOPDIR)/tools/incdir.c
+$(INCDIR): $(TOPDIR)$(DELIM)tools$(DELIM)incdir.c
 	$(HOSTCC) $(HOSTINCLUDES) $(HOSTCFLAGS) $< -o $@
 
 IMPORT_TOOLS = $(MKDEP) $(INCDIR)
@@ -181,7 +181,7 @@ register_all: $(foreach SDIR, $(CONFIGURED_APPS), $(SDIR)_register)
 postinstall_all: $(foreach SDIR, $(CONFIGURED_APPS), $(SDIR)_postinstall)
 
 staging:
-	$(Q) mkdir -p $@
+	$(call MKDIRECTORY,$@)
 
 context: | staging
 	$(Q) $(MAKE) context_all
